@@ -4,9 +4,17 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 5000;
 
+app.use(express.json()); // this ensures input is considered to be json
+
 app.get ("/", (req, res)=>{
     res.status(200).send("Hello world");
 });
+
+app.post("/:username/", (req, res)=>{
+    console.log(req.body);
+    res.status(201).json({"message": `You created the repo ${req.body.project}`, "data": req.body});
+});
+
 
 app.get("/about", (req, res) => {
     res.status(200).send("This is the about route");
@@ -18,9 +26,12 @@ app.get("/users/:username", (req, res) => {
 });
 
 app.get("/:username/:project", (req, res) => {
-    res.status(200).send(`You requested information about ${req.params.project} created by ${req.params.username}`);
+    res.status(200).json({"message": `You views the project ${req.params.project}`});
 });
 
-app.listen(port,()=>{
+app.post("/:username/:project", (req, res) => {
+    res.status(200).json({"message": `You updated the project: ${req.params.project}`, "date": req.body});
+});
+app.listen(port, () => {
     console.log("App is online");
 });

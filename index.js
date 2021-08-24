@@ -12,27 +12,15 @@ app.get ("/", (req, res)=>{
     res.status(200).send("Hello world");
 });
 
-app.post("/register", (req, res) => {
-    bcrypt.genSalt(saltRounds, (err, salt) => {
-        if (err) {
-            res.status(500).json({"message": `Something went wrong`, "error": err});
-        }
+app.post("/register", async(req, res) => {
+    const salt = await bcrypt.genSalt(saltRounds);
+    const hash = await bcrypt.hash(req.body.password, salt);
 
-        bcrypt.hash(req.body.password, salt, (err, hash) => {
-            if (err) {
-                res.status(500).json({"message": `Something went wrong`, "error": err});
-            }
-
-            bcrypt.compare(req.body.checkPassword, hash, (err, result) => {
-                if (result) {
-                    res.status(201).json({"message": `Password ${req.body.checkPassword} matches ${hash}`});
-                } else {
-                    res.status(401).json({"message": `Password ${req.body.checkPassword} does not match ${hash}`});
-                }
-            });
-
-        });
-    });
+    if (await bcrypt.compare(req.body.checkPassword, hash)) {
+        res.status(201).json({"message": `Password ${req.body.checkPassword} matches ${hash}`});
+    } else {
+        res.status(401).json({"message": `Password ${req.body.checkPassword} does not match ${hash}`});
+    }
 });
 
 app.post("/:username/", (req, res)=>{

@@ -1,4 +1,6 @@
 const express = require("express");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 require("dotenv").config();
 
 const app = express();
@@ -10,14 +12,32 @@ app.get ("/", (req, res)=>{
     res.status(200).send("Hello world");
 });
 
+app.post("/register", (req, res) => {
+    bcrypt.genSalt(saltRounds, (err, salt) => {
+        if (err) {
+            res.status(500).json({"message": `Something went wrong`, "error": err});
+        }
+
+        bcrypt.hash(req.body.password, salt, (err, hash) => {
+            if (err) {
+                res.status(500).json({"message": `Something went wrong`, "error": err});
+            }
+
+            bcrypt.compare(req.body.checkPassword, hash, (err, result) => {
+                if (result) {
+                    res.status(201).json({"message": `Password ${req.body.checkPassword} matches ${hash}`});
+                } else {
+                    res.status(401).json({"message": `Password ${req.body.checkPassword} does not match ${hash}`});
+                }
+            });
+
+        });
+    });
+});
+
 app.post("/:username/", (req, res)=>{
     console.log(req.body);
     res.status(201).json({"message": `You created the repo ${req.body.project}`, "data": req.body});
-});
-
-
-app.get("/about", (req, res) => {
-    res.status(200).send("This is the about route");
 });
 
 app.get("/users/:username", (req, res) => {

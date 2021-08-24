@@ -1,7 +1,9 @@
+require("dotenv").config();
 const express = require("express");
 const bcrypt = require("bcrypt");
+const { connection } = require("./db");
 const saltRounds = 10;
-require("dotenv").config();
+
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -41,5 +43,6 @@ app.post("/:username/:project", (req, res) => {
     res.status(200).json({"message": `You updated the project: ${req.params.project}`, "date": req.body});
 });
 app.listen(port, () => {
+    connection.authenticate();
     console.log("App is online");
 });

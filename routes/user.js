@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const { addUser, listUsers } = require("../utils/user");
 
 const router = express.Router();
+const saltRounds = 10;
 
 router.get("/", async(req, res) => {
     res.status(200).json({"msg": await listUsers()});
@@ -22,7 +23,7 @@ router.post("/register", async(req, res) => {
     const salt = await bcrypt.genSalt(saltRounds);
     const hash = await bcrypt.hash(req.body.password, salt);
 
-    addUser(req.body.name, hash);
+    await addUser(req.body.name, hash);
     res.status(201).json({"msg": "Created user"});
     // User entered two different passwords
     /*if (await bcrypt.compare(req.body.checkPassword, hash)) {
